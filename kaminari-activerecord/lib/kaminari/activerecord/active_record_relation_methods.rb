@@ -34,5 +34,45 @@ module Kaminari
         c.respond_to?(:count) ? c.count(column_name) : c
       end
     end
+
+    def without_count
+      extend ::Kaminari::PaginableWithoutCount
+    end
+  end
+
+  module PaginableWithoutCount
+    def load
+      if loaded? || limit_value.nil?
+        super
+      else
+        begin
+          org_limit, @values[:limit] = limit_value, limit_value.succ
+          super
+        ensure
+          @values[:limit] = org_limit
+        end
+
+        if @records.any?
+          @records = @records.dup if (frozen = @records.frozen?)
+          @_has_next = !!@records.delete_at(limit_value.to_i)
+          @records.freeze if frozen
+        end
+
+        self
+      end
+    end
+
+    def last_page?
+      !out_of_range? && !@_has_next
+    end
+
+    def out_of_range?
+      to_a.empty?
+    end
+
+    def total_count
+      raise "This scope is marked as a non-count paginate scope and can't be used in combination " \
+            "with `#paginate' or `#page_entries_info'."
+    end
   end
 end
