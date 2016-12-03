@@ -69,7 +69,7 @@ module Kaminari
 
     # Last page of the collection?
     def last_page?
-      current_page == total_pages
+      defined?(@_has_next) ? (!out_of_range? && !@_has_next) : (current_page == total_pages)
     end
 
     # Out of range of the collection?

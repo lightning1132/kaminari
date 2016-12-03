@@ -59,10 +59,6 @@ module Kaminari
       end
     end
 
-    def last_page?
-      !out_of_range? && !@_has_next
-    end
-
     def out_of_range?
       @records.empty?
     end
